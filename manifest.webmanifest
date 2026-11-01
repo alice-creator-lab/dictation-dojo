@@ -1,0 +1,18 @@
+{
+  "name": "默書 Dojo",
+  "short_name": "默書",
+  "description": "小學生默書練習：家長貼文章，app 抽出題目讀出嚟，小朋友手寫對答案",
+  "lang": "zh-HK",
+  "dir": "ltr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4efe6",
+  "theme_color": "#2c3e6b",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
