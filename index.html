@@ -146,6 +146,34 @@
   .rcard canvas{display:block; margin:0 auto; max-width:100%;}
   .rcard .blank{font-size:11px; color:var(--ink-soft); text-align:center; padding:14px 0 16px;}
 
+  /* 教育局《香港小學學習字詞表》：正確字形（撳字去睇筆順） */
+  .glyphs{display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 0;}
+  .gz{position:relative; width:60px; height:60px; flex:0 0 auto; border:1.5px solid #ded3bd;
+    border-radius:8px; display:flex; align-items:center; justify-content:center;
+    font-family:"Noto Serif TC",serif; font-size:35px; line-height:1; padding-top:2px;
+    color:var(--ink); text-decoration:none;
+    background:
+      linear-gradient(to right, transparent calc(50% - .5px), #ece0c8 calc(50% - .5px), #ece0c8 calc(50% + .5px), transparent calc(50% + .5px)),
+      linear-gradient(to bottom, transparent calc(50% - .5px), #ece0c8 calc(50% - .5px), #ece0c8 calc(50% + .5px), transparent calc(50% + .5px)),
+      #fffefb;}
+  a.gz{box-shadow:0 1px 0 rgba(0,0,0,.04);}
+  a.gz:active{transform:translateY(1px); background-color:#f4ecda;}
+  .gz.off{opacity:.42;}
+  .gz i{position:absolute; right:3px; bottom:2px; font-size:8.5px; font-style:normal;
+    font-weight:800; color:var(--vermilion); letter-spacing:0;}
+  .glyphs.big{gap:10px; justify-content:center;}
+  .glyphs.big .gz{width:80px; height:80px; font-size:48px; border-width:2px; border-radius:10px;}
+  .glyphs.big .gz i{font-size:10px; right:5px; bottom:3px;}
+  .rcard .glyphs{gap:4px; margin:4px 0 0; justify-content:center;}
+  .rcard .gz{width:34px; height:34px; font-size:20px; border-radius:5px;}
+  .rcard .gz i{display:none;}
+  .sum-glyphs{display:flex; justify-content:center; margin-top:12px;}
+  .gz-hint{font-size:11.5px; color:var(--ink-soft); margin-top:7px; line-height:1.5;}
+  .gz-hint b{color:var(--indigo); font-weight:700;}
+  .wrong-acts{display:flex; gap:9px; margin-top:16px;}
+  .wrong-acts .mini{flex:0 0 auto;}
+  .wrong-acts .btn-main{flex:1; margin:0;}
+
   .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:2px;}
   .stat{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:9px 4px; text-align:center;}
   .stat .n{display:block; font-size:18px; font-weight:800; color:var(--indigo);}
@@ -267,6 +295,8 @@
       <div class="answer" id="answerBox">
         <div class="ans-lab">正確答案</div>
         <div class="ans-txt" id="ansTxt"></div>
+        <div class="glyphs" id="glyphRow"></div>
+        <div class="gz-hint" id="glyphHint"></div>
         <div class="score">
           <button class="ok" id="okBtn">✓ 啱</button>
           <button class="no" id="noBtn">✗ 錯</button>
@@ -289,6 +319,8 @@
     <div class="summary">
       <div class="big" id="sumTitle">默書完成</div>
       <div class="sub" id="sumText"></div>
+      <div class="sum-glyphs"><div class="glyphs" id="sumGlyphs"></div></div>
+      <div class="gz-hint" id="sumHint" style="display:none;">撳錯字 → 教育局《香港小學學習字詞表》：字形・筆順・讀音</div>
       <div class="acts">
         <button class="btn-main" id="reviewBtn">睇返小朋友寫嘅</button>
         <button class="btn-main ghost" id="retryWrongBtn">重練錯題</button>
@@ -298,7 +330,7 @@
     </div>
   </section>
 
-  <footer>默書 Dojo · 手寫後自己對答案 · 語音由裝置 TTS 提供</footer>
+  <footer>默書 Dojo · 手寫後自己對答案 · 語音由裝置 TTS 提供<br>錯字對照：教育局《香港小學學習字詞表》（字形・筆順・讀音）</footer>
 </div>
 
 <!-- ══════ 家長睇返手寫 ══════ -->
@@ -313,6 +345,24 @@
     </div>
     <p class="sheet-note" id="reviewNote"></p>
     <div class="rgrid" id="reviewGrid"></div>
+  </div>
+</div>
+
+<!-- ══════ 錯字：教育局字詞表正確寫法 ══════ -->
+<div class="overlay" id="wrongOverlay">
+  <div class="sheet">
+    <div class="sheet-head">
+      <h3>✗ 呢個要睇清楚點寫</h3>
+      <div class="sheet-acts">
+        <button class="x" id="wrongSpeak">再聽一次</button>
+      </div>
+    </div>
+    <p class="sheet-note" id="wrongNote"></p>
+    <div class="glyphs big" id="wrongGlyphs"></div>
+    <div class="gz-hint" id="wrongHint"></div>
+    <div class="wrong-acts">
+      <button class="btn-main" id="wrongNext">繼續 →</button>
+    </div>
   </div>
 </div>
 
@@ -468,6 +518,73 @@
       el.appendChild(x);
       box.appendChild(el);
     });
+  }
+
+  // ── 教育局《香港小學學習字詞表》────────────────────────────
+  // edb-ids.json = {"字": id}，由 tools/build_edb_ids.py 掃 result.jsp 建成。
+  // id 對應 https://www.edbchinese.hk/lexlist_ch/result.jsp?id=NNNN
+  // —— 官方頁有字形、部首筆畫、粵/普讀音，同埋筆順示範動畫。
+  // 佢個動畫係 iframe 且 X-Frame-Options: SAMEORIGIN，所以只能開新視窗睇。
+  let EDB = null, edbPromise = null;
+  function loadEdb(){
+    if(edbPromise) return edbPromise;
+    edbPromise = fetch('edb-ids.json')
+      .then(r => { if(!r.ok) throw new Error('edb ' + r.status); return r.json(); })
+      .then(d => { EDB = d || {}; refreshGlyphs(); return EDB; })
+      .catch(() => { EDB = {}; refreshGlyphs(); return EDB; });
+    return edbPromise;
+  }
+
+  function edbUrl(ch){
+    const id = EDB && EDB[ch];
+    return id ? 'https://www.edbchinese.hk/lexlist_ch/result.jsp?id=' + String(id).padStart(4, '0') : '';
+  }
+
+  // 逐字畫田字格；有教育局條目就撳得，冇就淡色顯示（唔誤導）
+  function renderGlyphs(box, text, hintEl){
+    if(!box) return 0;
+    box.innerHTML = '';
+    const chars = [...(text || '')].filter(c => HAN.test(c));
+    let links = 0;
+    chars.forEach(ch => {
+      const url = edbUrl(ch);
+      const el = document.createElement(url ? 'a' : 'span');
+      el.className = 'gz' + (url ? '' : ' off');
+      const glyph = document.createElement('span'); glyph.textContent = ch;
+      el.appendChild(glyph);
+      if(url){
+        el.href = url; el.target = '_blank'; el.rel = 'noopener';
+        el.title = '教育局《香港小學學習字詞表》' + ch + '：字形・筆順・讀音';
+        const tag = document.createElement('i'); tag.textContent = '筆順';
+        el.appendChild(tag);
+        links++;
+      }
+      box.appendChild(el);
+    });
+    box.style.display = chars.length ? 'flex' : 'none';
+    if(hintEl){
+      if(links){
+        hintEl.innerHTML = '撳字 → <b>教育局《香港小學學習字詞表》</b>睇字形、筆順示範、讀音';
+        hintEl.style.display = 'block';
+      }else if(chars.length){
+        hintEl.textContent = '呢啲字未收入教育局《小學學習字詞表》（可能係人名、方言或異體字）。';
+        hintEl.style.display = 'block';
+      }else{
+        hintEl.style.display = 'none';
+      }
+    }
+    return links;
+  }
+
+  function refreshGlyphs(){
+    if(S.revealed && currentText) renderGlyphs($('glyphRow'), currentText, $('glyphHint'));
+    if($('wrongOverlay').classList.contains('show')) renderGlyphs($('wrongGlyphs'), wrongText, $('wrongHint'));
+    if(!$('summaryPanel').classList.contains('hidden')) renderSummaryGlyphs();
+  }
+
+  function renderSummaryGlyphs(){
+    const chars = uniq(S.wrong.join('').split(''));
+    renderGlyphs($('sumGlyphs'), chars.join(''), $('sumHint'));
   }
 
   // ── 語音 ────────────────────────────────────────────────
@@ -707,6 +824,7 @@
     S.revealed = true;
     stopSpeak();
     $('ansTxt').textContent = currentText;
+    renderGlyphs($('glyphRow'), currentText, $('glyphHint'));
     $('answerBox').classList.add('show');
     $('revealBtn').disabled = true;
   }
@@ -819,6 +937,14 @@
       a.className = 'ans'; a.textContent = item.t || '';
       card.appendChild(a);
 
+      // 默錯嘅，逐字列出教育局標準字形，撳得去睇筆順
+      if(!item.ok && item.t){
+        const g = document.createElement('div');
+        g.className = 'glyphs';
+        renderGlyphs(g, item.t, null);
+        if(g.childNodes.length) card.appendChild(g);
+      }
+
       if(!item.s || !item.s.length){
         const b = document.createElement('div');
         b.className = 'blank'; b.textContent = '（冇寫嘢）';
@@ -860,12 +986,34 @@
     if(S.answered) return;
     S.answered = true;
     try{ captureAnswer(ok); }catch(e){ /* 儲筆跡失敗都唔可以卡住默書流程 */ }
-    if(ok) S.stats.ok++;
-    else { S.stats.no++; S.wrong.push(currentText); }
+    if(ok){ S.stats.ok++; nextQuestion(); }
+    else {
+      S.stats.no++; S.wrong.push(currentText);
+      updateStats();
+      showWrong(currentText);
+    }
+  }
+
+  function nextQuestion(){
     S.i++;
     updateStats();
     $('barFill').style.width = (S.i / S.queue.length * 100) + '%';
     setTimeout(loadCurrent, 180);
+  }
+
+  // 默錯咗：即刻睇教育局字詞表嘅正確字形，撳字睇筆順
+  let wrongText = '';
+  function showWrong(text){
+    wrongText = text;
+    $('wrongNote').textContent = '默錯咗唔緊要——逐格臨一次，撳字可以睇筆順示範。';
+    renderGlyphs($('wrongGlyphs'), text, $('wrongHint'));
+    $('wrongOverlay').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeWrong(){
+    $('wrongOverlay').classList.remove('show');
+    document.body.style.overflow = '';
   }
 
   function showSummary(){
@@ -881,6 +1029,8 @@
     $('retryWrongBtn').textContent = '重練錯題（' + S.wrong.length + '）';
     $('reviewBtn').style.display = S.answers.length ? 'block' : 'none';
     $('reviewBtn').textContent = '睇返小朋友寫嘅（' + S.answers.length + '）';
+    renderSummaryGlyphs();
+    $('sumGlyphs').parentElement.style.display = S.wrong.length ? 'flex' : 'none';
   }
 
   // ── 事件 ────────────────────────────────────────────────
@@ -963,6 +1113,13 @@
     if(reviewCache) openReview(reviewCache.items, reviewCache.title, reviewCache.when);
   });
   $('reviewOverlay').addEventListener('click', e => { if(e.target === $('reviewOverlay')) closeReview(); });
+
+  // 錯字面板：睇完正確寫法就繼續
+  $('wrongNext').addEventListener('click', () => { closeWrong(); nextQuestion(); });
+  $('wrongSpeak').addEventListener('click', () => speak(wrongText, S.rep));
+  $('wrongOverlay').addEventListener('click', e => {
+    if(e.target === $('wrongOverlay')){ closeWrong(); nextQuestion(); }
+  });
   $('againBtn').addEventListener('click', () => startRound(S.items));
   $('sumBackBtn').addEventListener('click', () => $('tabSeg').querySelector('[data-tab="setup"]').click());
 
@@ -973,6 +1130,10 @@
   });
 
   document.addEventListener('keydown', e => {
+    if($('wrongOverlay').classList.contains('show')){
+      if(e.key === 'Enter' || e.key === 'Escape'){ e.preventDefault(); closeWrong(); nextQuestion(); }
+      return;
+    }
     if($('reviewOverlay').classList.contains('show') && e.key === 'Escape'){ closeReview(); return; }
     if($('practicePanel').classList.contains('hidden')) return;
     if(e.key === ' '){ e.preventDefault(); if(!S.revealed) speak(currentText, S.rep); }
@@ -998,6 +1159,7 @@
   // 預先載入詞典，等家長撳「抽取題目」時唔使等
   if(S.mode === 'word') setTimeout(loadDict, 300);
   else setTimeout(loadDict, 1500);
+  loadEdb();   // 教育局字詞表對照表（細檔，順手預載）
 
   // 有上次嘅手寫紀錄就顯示入口
   const savedAns = loadSavedAnswers();
@@ -1005,6 +1167,20 @@
     const btn = $('lastReviewBtn');
     btn.style.display = 'block';
     btn.textContent = '睇返上次默書手寫（' + savedAns.items.length + ' 題）';
+  }
+
+  // ?demo=wrong 自動跑一次「默錯 → 正確寫法」流程（畀截圖 / 快速自檢用）
+  const demoCase = new URLSearchParams(location.search).get('demo');
+  if(demoCase){
+    setTimeout(async () => {
+      $('rawText').value = '學校 公園 圖書館 蝴蝶';
+      S.mode = 'word';
+      [...$('modeSeg').children].forEach(b => b.classList.toggle('active', b.dataset.mode === 'word'));
+      await extract();
+      if(!S.items.length) S.items = ['學校', '公園', '圖書館', '蝴蝶'];
+      startRound(S.items);
+      setTimeout(() => { reveal(); if(demoCase === 'wrong') score(false); }, 500);
+    }, 400);
   }
 
   if('serviceWorker' in navigator && location.protocol.startsWith('http')){
