@@ -447,42 +447,62 @@
     return dictPromise;
   }
 
-  // 正向最大匹配：由左至右，每次試最長嘅詞
-  function fmmSegment(text){
-    const out = [];
-    (text.match(CJK_RUN) || []).forEach(run => {
-      let i = 0;
-      while(i < run.length){
-        let hit = '';
-        const maxL = Math.min(DICT_MAXLEN, run.length - i);
-        for(let L = maxL; L >= 2; L--){
-          const cand = run.substr(i, L);
-          if(WORDDICT.has(cand)){ hit = cand; break; }
-        }
-        if(hit){ out.push(hit); i += hit.length; }
-        else i += 1;
-      }
-    });
-    return out;
-  }
-
-  // 瀏覽器內建分詞（Chrome 系有中文詞典，Safari 可能冇）—— 只做後備
-  function segSegmenter(text){
+  // 詞語抽取：詞典 ∪ 瀏覽器分詞，再用「詞長平方」評分揀最佳切法。
+  // 只用 dict.txt 嘅正向最大匹配會漏字（起床／刷牙／早餐／可以／說謊都唔在詞典），
+  // 亦會切錯（吃過早餐 → 過早）。瀏覽器內建中文分詞（Chrome/Safari 都有）補漏，
+  // 兩邊一齊評分就唔會揀短嘅錯切法。
+  function collectSegmenterWords(text){
     try{
       const seg = new Intl.Segmenter('zh-Hant', {granularity:'word'});
       return [...seg.segment(text)]
         .filter(s => s.isWordLike)
         .map(s => s.segment.replace(STRIP_NON_CJK, ''))
-        .filter(s => s.length >= 2);
+        .filter(w => w.length >= 2);
     }catch(e){ return []; }
   }
 
+  function bestSegmentation(run, WORDS, maxL){
+    const n = run.length;
+    const best = new Array(n + 1).fill(-1);
+    const pick = new Array(n + 1).fill(null);
+    best[n] = 0;
+    for(let i = n - 1; i >= 0; i--){
+      for(let L = 1; L <= Math.min(maxL, n - i); L++){
+        const isWord = L >= 2 && WORDS.has(run.substr(i, L));
+        if(L > 1 && !isWord) continue;      // 冇收錄就唔好亂切多字
+        const sc = (isWord ? L * L : 1) + (best[i + L] >= 0 ? best[i + L] : -1e9);
+        if(sc > best[i]){ best[i] = sc; pick[i] = { len: L, word: isWord ? run.substr(i, L) : null }; }
+      }
+    }
+    const out = [];
+    for(let i = 0; i < n;){
+      const p = pick[i];
+      if(!p) break;
+      if(p.word) out.push(p.word);
+      i += p.len;
+    }
+    return out;
+  }
+
   function extractWords(text){
-    const a = fmmSegment(text || '');
-    if(a.length >= 3) return uniq(a);
-    const b = segSegmenter(text || '');
-    if(b.length >= 3) return uniq(b);
-    return uniq([...a, ...b]);
+    const raw = String(text || '');
+    // 先按明確分隔切（空白、頓號、逗號、斜線…）：家長多數成行貼生字表
+    const chunks = raw.split(/[\s\u3000、，,／\/|｜·・。！？；;：:]+/).filter(Boolean);
+    const segWords = collectSegmenterWords(raw);
+    const WORDS = new Set(segWords);
+    if(WORDDICT) WORDDICT.forEach(w => { if(w.length >= 2) WORDS.add(w); });
+    const maxL = Math.max(3, Math.min(DICT_MAXLEN + 2, 8));
+    const out = [], seen = new Set();
+    const push = w => {
+      if(!w || w.length < 2 || seen.has(w)) return;
+      seen.add(w); out.push(w);
+    };
+    chunks.forEach(ch => {
+      (ch.match(CJK_RUN) || []).forEach(run => {
+        bestSegmentation(run, WORDS, maxL).forEach(push);
+      });
+    });
+    return out;
   }
 
   function extractSentences(text){
@@ -676,7 +696,8 @@
       u.pitch = 1;
       u.onend = () => {
         if(mySeq !== speakSeq) return;
-        if(n < times) speakTimer = setTimeout(next, 650);
+        // 讀多次時中間留 4 秒，等小朋友有時間落筆（太密會疊聲／聽唔清）
+        if(n < times) speakTimer = setTimeout(next, 4000);
       };
       u.onerror = () => {};
       speechSynthesis.speak(u);
