@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-HK">
+<html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -118,7 +118,7 @@
   .summary .sub{font-size:14px; color:var(--ink-soft); margin-top:8px; line-height:1.8;}
   .summary .acts{display:flex; flex-direction:column; gap:9px; margin-top:18px;}
 
-  /* 家長睇返手寫 */
+  /* 家長查看手寫 */
   .overlay{position:fixed; inset:0; z-index:60; display:none; overflow:auto;
     background:rgba(35,32,28,.58); -webkit-overflow-scrolling:touch; padding:14px;}
   .overlay.show{display:block;}
@@ -144,7 +144,7 @@
   .rcard canvas{display:block; margin:0 auto; max-width:100%;}
   .rcard .blank{font-size:11px; color:var(--ink-soft); text-align:center; padding:14px 0 16px;}
 
-  /* 教育局《香港小學學習字詞表》：正確字形（撳字去睇筆順） */
+  /* 教育局《香港小學學習字詞表》：正確字形（點字查看筆順） */
   .glyphs{display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 0;}
   .gz{position:relative; width:60px; height:60px; flex:0 0 auto; border:1.5px solid #ded3bd;
     border-radius:8px; display:flex; align-items:center; justify-content:center;
@@ -221,7 +221,7 @@
     </div>
 
     <div class="field">
-      <span class="lab">抽咩嚟默</span>
+      <span class="lab">抽取題目類型</span>
       <div class="seg" id="modeSeg">
         <button data-mode="char">單字</button>
         <button data-mode="word" class="active">詞語</button>
@@ -238,7 +238,7 @@
     </div>
 
     <div class="field">
-      <span class="lab">每個讀幾次</span>
+      <span class="lab">每個詞讀幾次</span>
       <div class="seg" id="repeatSeg">
         <button data-rep="1">1 次</button>
         <button data-rep="2" class="active">2 次</button>
@@ -267,7 +267,7 @@
     <div class="field" style="margin-top:16px;">
       <span class="lab">題目預覽 <span id="countTag" style="color:var(--vermilion);"></span></span>
       <div class="chips" id="chips"></div>
-      <div class="empty" id="chipsEmpty">撳上面「抽取題目」就會見到題目；撳字可以試聽，撳 × 可以刪走。</div>
+      <div class="empty" id="chipsEmpty">按上方「抽取題目」即可看到題目；點字詞可試聽，點 × 可刪除。</div>
       <div class="row" style="margin-top:10px;">
         <input id="addInput" placeholder="自己加題目…" autocomplete="off"
                style="flex:1; min-width:120px; font-family:inherit; font-size:14px; padding:8px 12px;
@@ -277,7 +277,7 @@
     </div>
 
     <button class="btn-main" id="startBtn" disabled>開始默書</button>
-    <button class="btn-main ghost" id="lastReviewBtn" style="display:none;">睇返上次默書手寫</button>
+    <button class="btn-main ghost" id="lastReviewBtn" style="display:none;">查看上次默書手寫</button>
     <button class="btn-main ghost" id="wrongBookBtn">錯題簿（0）</button>
   </section>
 
@@ -294,7 +294,7 @@
         <button class="speakbtn" id="speakBtn" title="再聽一次">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4.03v8.05A4.5 4.5 0 0 0 16.5 12zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
         </button>
-        <div class="hint">聽清楚 → 每格寫一個字 → 撳「睇答案」自己對</div>
+        <div class="hint">聽清楚 → 每格寫一個字 → 按「看答案」自行核對</div>
         <div class="cnt" id="charCount"></div>
       </div>
 
@@ -303,7 +303,7 @@
       <div class="writebar">
         <button class="mini" id="undoBtn">撤銷</button>
         <button class="mini" id="clearBtn">清除</button>
-        <button class="revealbtn" id="revealBtn">睇答案</button>
+        <button class="revealbtn" id="revealBtn">看答案</button>
       </div>
 
       <div class="answer" id="answerBox">
@@ -311,7 +311,7 @@
         <div class="glyphs" id="glyphRow"></div>
         <div class="gz-hint" id="glyphHint"></div>
         <div class="score">
-          <button class="ok" id="okBtn">✓ 啱</button>
+          <button class="ok" id="okBtn">✓ 對</button>
           <button class="no" id="noBtn">✗ 錯</button>
         </div>
       </div>
@@ -319,7 +319,7 @@
 
     <div class="stats">
       <div class="stat"><span class="n" id="stDone">0</span><span class="l">已默</span></div>
-      <div class="stat"><span class="n g" id="stOk">0</span><span class="l">啱</span></div>
+      <div class="stat"><span class="n g" id="stOk">0</span><span class="l">對</span></div>
       <div class="stat"><span class="n r" id="stNo">0</span><span class="l">錯</span></div>
       <div class="stat"><span class="n" id="stAcc">—</span><span class="l">正確率</span></div>
     </div>
@@ -333,9 +333,9 @@
       <div class="big" id="sumTitle">默書完成</div>
       <div class="sub" id="sumText"></div>
       <div class="sum-glyphs"><div class="glyphs" id="sumGlyphs"></div></div>
-      <div class="gz-hint" id="sumHint" style="display:none;">撳錯字 → 教育局《香港小學學習字詞表》：字形・筆順・讀音</div>
+      <div class="gz-hint" id="sumHint" style="display:none;">點錯字 → 教育局《香港小學學習字詞表》：字形、筆順、讀音</div>
       <div class="acts">
-        <button class="btn-main" id="reviewBtn">睇返小朋友寫嘅</button>
+        <button class="btn-main" id="reviewBtn">查看小朋友寫的</button>
         <button class="btn-main ghost" id="retryWrongBtn">重練錯題</button>
         <button class="btn-main ghost" id="againBtn">再默一次</button>
         <button class="btn-main ghost" id="sumBackBtn">返回設定</button>
@@ -343,16 +343,16 @@
     </div>
   </section>
 
-  <footer>默書 Dojo · 手寫後自己對答案 · 語音由裝置 TTS 提供<br>錯字對照：教育局《香港小學學習字詞表》（字形・筆順・讀音）</footer>
+  <footer>默書 Dojo · 手寫後自己對答案 · 語音由裝置 TTS 提供<br>錯字對照：教育局《香港小學學習字詞表》（字形、筆順、讀音）</footer>
 </div>
 
-<!-- ══════ 家長睇返手寫 ══════ -->
+<!-- ══════ 家長查看手寫 ══════ -->
 <div class="overlay" id="reviewOverlay">
   <div class="sheet">
     <div class="sheet-head">
-      <h3 id="reviewTitle">小朋友寫成點</h3>
+      <h3 id="reviewTitle">小朋友寫得如何</h3>
       <div class="sheet-acts">
-        <button class="x" id="guideToggle" title="喺田字格淡淡顯示正確寫法，方便對照">對照字</button>
+        <button class="x" id="guideToggle" title="在田字格淡淡顯示正確寫法，方便對照">對照字</button>
         <button class="x" id="reviewClose">關閉</button>
       </div>
     </div>
@@ -365,7 +365,7 @@
 <div class="overlay" id="wrongOverlay">
   <div class="sheet">
     <div class="sheet-head">
-      <h3>✗ 呢個要睇清楚點寫</h3>
+      <h3>✗ 這個字要看清楚怎麼寫</h3>
       <div class="sheet-acts">
         <button class="x" id="wrongSpeak">再聽一次</button>
       </div>
@@ -424,8 +424,8 @@
   }
 
   // ── 中文詞語詞典（正向最大匹配）────────────────────────────
-  // 唔靠 Intl.Segmenter，因為 Safari / 舊 Android WebView 冇中文詞典，
-  // 會逐個字切開，結果詞語模式抽出嚟全部係單字。
+  // 不靠 Intl.Segmenter，因為 Safari / 舊 Android WebView 沒有中文詞典，
+  // 會逐個字切開，結果詞語模式抽出的都是單字。
   const CJK_RUN = /[\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF]+/g;
   const STRIP_NON_CJK = /[^\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF]/g;
   let WORDDICT = null, DICT_MAXLEN = 4, dictPromise = null;
@@ -447,10 +447,10 @@
     return dictPromise;
   }
 
-  // 詞語抽取：詞典 ∪ 瀏覽器分詞，再用「詞長平方」評分揀最佳切法。
-  // 只用 dict.txt 嘅正向最大匹配會漏字（起床／刷牙／早餐／可以／說謊都唔在詞典），
-  // 亦會切錯（吃過早餐 → 過早）。瀏覽器內建中文分詞（Chrome/Safari 都有）補漏，
-  // 兩邊一齊評分就唔會揀短嘅錯切法。
+  // 詞語抽取：詞典 ∪ 瀏覽器分詞，再用「詞長平方」評分選最佳切法。
+  // 只用 dict.txt 的正向最大匹配會漏字（起床／刷牙／早餐／可以／說謊都不在詞典），
+  // 亦會切錯（吃過早餐 → 過早）。瀏覽器內建中文分詞（Chrome/Safari 皆有）補漏，
+  // 兩邊一起評分就不會選到較短的錯誤切法。
   function collectSegmenterWords(text){
     try{
       const seg = new Intl.Segmenter('zh-Hant', {granularity:'word'});
@@ -469,7 +469,7 @@
     for(let i = n - 1; i >= 0; i--){
       for(let L = 1; L <= Math.min(maxL, n - i); L++){
         const isWord = L >= 2 && WORDS.has(run.substr(i, L));
-        if(L > 1 && !isWord) continue;      // 冇收錄就唔好亂切多字
+        if(L > 1 && !isWord) continue;      // 沒有收錄就不要亂切多字
         const sc = (isWord ? L * L : 1) + (best[i + L] >= 0 ? best[i + L] : -1e9);
         if(sc > best[i]){ best[i] = sc; pick[i] = { len: L, word: isWord ? run.substr(i, L) : null }; }
       }
@@ -486,8 +486,8 @@
 
   function extractWords(text){
     const raw = String(text || '');
-    // 先按明確分隔切（空白、頓號、逗號、斜線…）：家長多數成行貼生字表
-    const chunks = raw.split(/[\s\u3000、，,／\/|｜·・。！？；;：:]+/).filter(Boolean);
+    // 先按明確分隔切（空白、頓號、逗號、斜線…）：家長多數整行貼上生字表
+    const chunks = raw.split(/[\s\u3000、，,／\/|｜·、。！？；;：:]+/).filter(Boolean);
     const segWords = collectSegmenterWords(raw);
     const WORDS = new Set(segWords);
     if(WORDDICT) WORDDICT.forEach(w => { if(w.length >= 2) WORDS.add(w); });
@@ -536,10 +536,10 @@
   }
 
   function emptyHint(){
-    if(!$('rawText').value.trim()) return '先貼上默書內容，再撳「抽取題目」。';
-    if(S.mode === 'word') return '搵唔到詞語（詞語要兩個字以上）。試吓「單字」模式，或者喺下面自己加題目。';
-    if(S.mode === 'char') return '搵唔到中文字。檢查吓係咪貼咗啲拼音或者英文。';
-    return '搵唔到句子。試吓用句號或換行分開每一句。';
+    if(!$('rawText').value.trim()) return '請先貼上默書內容，再按「抽取題目」。';
+    if(S.mode === 'word') return '找不到詞語（詞語需兩個字以上）。可試「單字」模式，或在下方自行加入題目。';
+    if(S.mode === 'char') return '找不到中文字。請檢查是否貼了拼音或英文。';
+    return '找不到句子。可試用句號或換行分隔每一句。';
   }
 
   function renderChips(list){
@@ -573,8 +573,8 @@
   // ── 教育局《香港小學學習字詞表》────────────────────────────
   // edb-ids.json = {"字": id}，由 tools/build_edb_ids.py 掃 result.jsp 建成。
   // id 對應 https://www.edbchinese.hk/lexlist_ch/result.jsp?id=NNNN
-  // —— 官方頁有字形、部首筆畫、粵/普讀音，同埋筆順示範動畫。
-  // 佢個動畫係 iframe 且 X-Frame-Options: SAMEORIGIN，所以只能開新視窗睇。
+  // —— 官方頁有字形、部首筆畫、粵語／普通話讀音，以及筆順示範動畫。
+  // 其動畫是 iframe 且 X-Frame-Options: SAMEORIGIN，所以只能開新視窗觀看。
   let EDB = null, edbPromise = null;
   function loadEdb(){
     if(edbPromise) return edbPromise;
@@ -590,7 +590,7 @@
     return id ? 'https://www.edbchinese.hk/lexlist_ch/result.jsp?id=' + String(id).padStart(4, '0') : '';
   }
 
-  // 逐字畫田字格；有教育局條目就撳得，冇就淡色顯示（唔誤導）
+  // 逐字畫田字格；有教育局條目就可點按，沒有則淡色顯示（不誤導）
   function renderGlyphs(box, text, hintEl){
     if(!box) return 0;
     box.innerHTML = '';
@@ -604,7 +604,7 @@
       el.appendChild(glyph);
       if(url){
         el.href = url; el.target = '_blank'; el.rel = 'noopener';
-        el.title = '教育局《香港小學學習字詞表》' + ch + '：字形・筆順・讀音';
+        el.title = '教育局《香港小學學習字詞表》' + ch + '：字形、筆順、讀音';
         const tag = document.createElement('i'); tag.textContent = '筆順';
         el.appendChild(tag);
         links++;
@@ -614,10 +614,10 @@
     box.style.display = chars.length ? 'flex' : 'none';
     if(hintEl){
       if(links){
-        hintEl.innerHTML = '撳字 → <b>教育局《香港小學學習字詞表》</b>睇字形、筆順示範、讀音';
+        hintEl.innerHTML = '點字 → <b>教育局《香港小學學習字詞表》</b>查看字形、筆順示範、讀音';
         hintEl.style.display = 'block';
       }else if(chars.length){
-        hintEl.textContent = '呢啲字未收入教育局《小學學習字詞表》（可能係人名、方言或異體字）。';
+        hintEl.textContent = '這些字未收入教育局《小學學習字詞表》（可能是人名、方言或異體字）。';
         hintEl.style.display = 'block';
       }else{
         hintEl.style.display = 'none';
@@ -658,7 +658,7 @@
       o.textContent = v.name + ' · ' + v.lang + (/^(yue|zh-HK|zh_HK)/i.test(v.lang) ? ' ★' : '');
       sel.appendChild(o);
     });
-    // 揀返之前用過嘅，或者最似廣東話嘅
+    // 選回之前用過的，或最接近粵語的
     let pick = S.voiceURI && list.find(v => v.voiceURI === S.voiceURI);
     if(!pick) pick = zh.find(v => /yue|zh[-_]HK/i.test(v.lang)) || zh.find(v => /zh[-_]TW/i.test(v.lang)) || zh[0] || list[0];
     if(pick){ sel.value = pick.voiceURI; S.voiceURI = pick.voiceURI; }
@@ -696,7 +696,7 @@
       u.pitch = 1;
       u.onend = () => {
         if(mySeq !== speakSeq) return;
-        // 讀多次時中間留 4 秒，等小朋友有時間落筆（太密會疊聲／聽唔清）
+        // 讀多次時中間留 4 秒，讓小朋友有時間落筆（太密會疊聲／聽不清楚）
         if(n < times) speakTimer = setTimeout(next, 4000);
       };
       u.onerror = () => {};
@@ -715,14 +715,14 @@
   const paper = $('paper');
   let ctx = null, strokes = [], cur = null, drawing = false, dpr = 1;
 
-  // 依題目字數自動排格：每格盡量大，唔會剩一大片空白
+  // 依題目字數自動排格：每格盡量大，不會剩一大片空白
   let layout = { cols:1, rows:1, cell:180, w:320, h:190 };
 
   function computeLayout(){
     const wrap = paper.parentElement;
     const availW = Math.max(180, Math.round(wrap ? wrap.clientWidth : 320));
     const len = Math.max(1, (currentText || '').length);
-    // 每格最少想有 ~88px 闊，唔夠就開新一行
+    // 每格最少約 ~88px 寬，不足就換新一行
     const perRow = Math.max(1, Math.floor((availW - 12) / 88));
     const cols = Math.max(1, Math.min(len, perRow));
     const rows = Math.ceil(len / cols);
@@ -730,7 +730,7 @@
     const cap = len === 1 ? 260 : 190;
     let cell = Math.min((availW - 12) / cols, (maxH - 12) / rows, cap);
     cell = Math.max(36, Math.floor(cell));
-    // 畫布闊度貼住個格，唔會有空白邊俾小朋友寫出界
+    // 畫布寬度貼住格子，不會有空白邊讓小朋友寫出界
     return { cols, rows, cell, w: cell * cols + 12, h: cell * rows + 12 };
   }
 
@@ -777,9 +777,9 @@
 
   function redraw(){
     if(!ctx) return;
-    // 一次過用同一個 DPR 變換：格、十字線、筆跡全部同一個座標系，
-    // 之前 drawGrid() 喺 setTransform 之後（identity）畫，喺 2x 屏幕上
-    // 個格只畫到左上四分之一，同筆跡錯位，望落就好似「歪」。
+    // 一次使用同一個 DPR 變換：格、十字線、筆跡全部同一個座標系，
+    // 之前 drawGrid() 在 setTransform 之後（identity）畫，在 2x 螢幕上
+    // 格子只畫到左上四分之一，與筆跡錯位，看起來就像「歪」。
     ctx.save();
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, layout.w, layout.h);
@@ -852,12 +852,12 @@
     clearInk();
     $('answerBox').classList.remove('show');
     $('revealBtn').disabled = false;
-    $('revealBtn').textContent = '睇答案';
+    $('revealBtn').textContent = '看答案';
     $('charCount').textContent = '（' + currentText.length + ' 字）';
     $('progress').textContent = (S.i + 1) + ' / ' + S.queue.length;
     $('barFill').style.width = (S.i / S.queue.length * 100) + '%';
     updateStats();
-    fitCanvas();          // 每題唔同字數，重新排版
+    fitCanvas();          // 每題字數不同，重新排版
     setTimeout(() => { if(!S.revealed) speak(currentText, S.rep); }, 220);
   }
 
@@ -878,9 +878,9 @@
     $('revealBtn').disabled = true;
   }
 
-  // ── 儲低手寫寫跡（家長事後睇）────────────────────────────
-  // 將筆跡座標轉做「相對田字格」0–1000 嘅整數，唔受畫布大細影響，
-  // 之後可以喺任何尺寸重畫，而且 localStorage 用得少位。
+  // ── 儲存手寫筆跡（家長事後查看）──────────────────────────
+  // 將筆跡座標轉做「相對田字格」0–1000 的整數，不受畫布大小影響，
+  // 之後可以在任何尺寸重畫，而且 localStorage 佔用較少。
   function captureAnswer(ok){
     let s = [];
     const g = gridSpec();
@@ -897,7 +897,7 @@
   function saveAnswers(){
     try{
       localStorage.setItem('dictAnswers', JSON.stringify({ when: Date.now(), items: S.answers }));
-    }catch(_){ /* 空間唔夠就唔記，唔影響默書 */ }
+    }catch(_){ /* 空間不足就不記錄，不影響默書 */ }
   }
 
   function loadSavedAnswers(){
@@ -912,7 +912,7 @@
 
   // ── 錯題簿（跨次保存）──────────────────────────────────
   // storage: [{ t:'詞語', n:錯幾次, ts:最後一次 }]，最多 300 條。
-  // 默錯自動入簿，之後答返啱就自動移走（同 kana-dojo 一樣嘅規矩）。
+  // 默錯自動加入錯題簿，之後答對就自動移除（與 kana-dojo 相同的規則）。
   const WB_KEY = 'dictWrongBook';
   let WRONG_BOOK = loadWrongBook();
 
@@ -961,7 +961,7 @@
     if(!WRONG_BOOK.length){
       const p = document.createElement('div');
       p.className = 'wbempty';
-      p.textContent = '仲未有錯題。默錯嘅詞語會自動入嚟，之後默返啱就會自動移走。';
+      p.textContent = '目前沒有錯題。默錯的詞語會自動加入，答對後會自動移除。';
       list.appendChild(p);
     }
     WRONG_BOOK.forEach((it, idx) => {
@@ -969,7 +969,7 @@
       row.className = 'wbrow';
 
       const t = document.createElement('button');
-      t.className = 't'; t.textContent = it.t; t.title = '撳一下再聽一次';
+      t.className = 't'; t.textContent = it.t; t.title = '點一下再聽一次';
       t.addEventListener('click', () => speak(it.t));
       row.appendChild(t);
 
@@ -979,11 +979,11 @@
       if(g.childNodes.length) row.appendChild(g);
 
       const n = document.createElement('span');
-      n.className = 'n'; n.textContent = '錯' + (it.n || 1);
+      n.className = 'n'; n.textContent = '錯 ' + (it.n || 1) + ' 次';
       row.appendChild(n);
 
       const x = document.createElement('button');
-      x.className = 'del'; x.textContent = '×'; x.title = '由錯題簿移除';
+      x.className = 'del'; x.textContent = '×'; x.title = '從錯題簿移除';
       x.addEventListener('click', () => {
         WRONG_BOOK.splice(idx, 1);
         saveWrongBook();
@@ -994,7 +994,7 @@
       list.appendChild(row);
     });
     $('wbNote').textContent = WRONG_BOOK.length
-      ? '共 ' + WRONG_BOOK.length + ' 題 · 撳字再聽一次 · 撳細田字格睇筆順'
+      ? '共 ' + WRONG_BOOK.length + ' 題 · 點字再聽一次 · 點小田字格看筆順'
       : '';
     $('wbPractice').style.display = WRONG_BOOK.length ? 'block' : 'none';
   }
@@ -1011,13 +1011,13 @@
     document.body.style.overflow = '';
   }
 
-  // 喺細畫布重畫田字格 + 筆跡
+  // 在小畫布重畫田字格 + 筆跡
   let reviewGuide = false;
   let reviewCache = null;
 
   function drawInk(cv, item){
     const len = Math.max(1, (item.t || '').length);
-    // 用寫嗰時嘅欄數，唔可以重算，否則筆跡會對唔返格
+    // 用書寫當時的欄數，不可重算，否則筆跡會對不上格子
     const cols = Math.max(1, Math.min(item.c || len, len));
     const rows = Math.ceil(len / cols);
     const avail = Math.max(84, (cv.parentElement ? cv.parentElement.clientWidth : 110) - 12);
@@ -1087,7 +1087,7 @@
       a.className = 'ans'; a.textContent = item.t || '';
       card.appendChild(a);
 
-      // 默錯嘅，逐字列出教育局標準字形，撳得去睇筆順
+      // 默錯的，逐字列出教育局標準字形，可點按查看筆順
       if(!item.ok && item.t){
         const g = document.createElement('div');
         g.className = 'glyphs';
@@ -1097,23 +1097,23 @@
 
       if(!item.s || !item.s.length){
         const b = document.createElement('div');
-        b.className = 'blank'; b.textContent = '（冇寫嘢）';
+        b.className = 'blank'; b.textContent = '（沒有書寫）';
         card.appendChild(b);
       }else{
         const cv = document.createElement('canvas');
         card.appendChild(cv);
         grid.appendChild(card);
-        drawInk(cv, item);   // 要入咗 DOM 才知闊度
+        drawInk(cv, item);   // 要進入 DOM 後才知道寬度
         return;
       }
       grid.appendChild(card);
     });
 
-    $('reviewTitle').textContent = title || '小朋友寫成點';
-    const parts = ['共 ' + items.length + ' 題', '啱 ' + okN, '錯 ' + (items.length - okN)];
-    if(blankN) parts.push('冇寫 ' + blankN);
+    $('reviewTitle').textContent = title || '小朋友寫得如何';
+    const parts = ['共 ' + items.length + ' 題', '對 ' + okN, '錯 ' + (items.length - okN)];
+    if(blankN) parts.push('未寫 ' + blankN);
     if(when) parts.push(new Date(when).toLocaleString('zh-HK', {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'}));
-    $('reviewNote').textContent = parts.join(' · ') + '　—— 上面細字係正確答案，下面係小朋友寫嘅。';
+    $('reviewNote').textContent = parts.join(' · ') + '　—— 上方細字為正確答案，下方為小朋友所寫。';
 
     $('reviewOverlay').classList.add('show');
     document.body.style.overflow = 'hidden';
@@ -1135,10 +1135,10 @@
     if(!S.revealed) reveal();
     if(S.answered) return;
     S.answered = true;
-    try{ captureAnswer(ok); }catch(e){ /* 儲筆跡失敗都唔可以卡住默書流程 */ }
+    try{ captureAnswer(ok); }catch(e){ /* 儲存筆跡失敗也不可卡住默書流程 */ }
     if(ok){
       S.stats.ok++;
-      dropWrongItem(currentText);   // 默返啱就自動移出錯題簿
+      dropWrongItem(currentText);   // 答對後自動移出錯題簿
       nextQuestion();
     }
     else {
@@ -1156,11 +1156,11 @@
     setTimeout(loadCurrent, 180);
   }
 
-  // 默錯咗：即刻睇教育局字詞表嘅正確字形，撳字睇筆順
+  // 默錯時：立即查看教育局字詞表的正確字形，點字看筆順
   let wrongText = '';
   function showWrong(text){
     wrongText = text;
-    $('wrongNote').textContent = '默錯咗唔緊要——逐格臨一次，撳字可以睇筆順示範。';
+    $('wrongNote').textContent = '默錯不要緊——每格臨寫一次，點字可看筆順示範。';
     renderGlyphs($('wrongGlyphs'), text, $('wrongHint'));
     $('wrongOverlay').classList.add('show');
     document.body.style.overflow = 'hidden';
@@ -1177,14 +1177,14 @@
     $('summaryPanel').classList.remove('hidden');
     const t = S.stats.ok + S.stats.no;
     const acc = t ? Math.round(S.stats.ok / t * 100) : 0;
-    $('sumTitle').textContent = acc === 100 ? '全部啱晒！' : '默書完成';
-    $('sumText').innerHTML = '共 ' + t + ' 題 · 啱 <b>' + S.stats.ok + '</b> · 錯 <b>' + S.stats.no + '</b> · 正確率 ' + acc + '%'
-      + (S.wrong.length ? '<br>錯咗：' + S.wrong.join('、') : '')
-      + (S.wrong.length ? '<br>已寫入錯題簿，答返啱就會自動移走（簿中共 ' + WRONG_BOOK.length + ' 題）' : '');
+    $('sumTitle').textContent = acc === 100 ? '全部答對！' : '默書完成';
+    $('sumText').innerHTML = '共 ' + t + ' 題 · 對 <b>' + S.stats.ok + '</b> · 錯 <b>' + S.stats.no + '</b> · 正確率 ' + acc + '%'
+      + (S.wrong.length ? '<br>答錯：' + S.wrong.join('、') : '')
+      + (S.wrong.length ? '<br>已寫入錯題簿，答對後會自動移除（簿中共 ' + WRONG_BOOK.length + ' 題）' : '');
     $('retryWrongBtn').style.display = S.wrong.length ? 'block' : 'none';
     $('retryWrongBtn').textContent = '重練錯題（' + S.wrong.length + '）';
     $('reviewBtn').style.display = S.answers.length ? 'block' : 'none';
-    $('reviewBtn').textContent = '睇返小朋友寫嘅（' + S.answers.length + '）';
+    $('reviewBtn').textContent = '查看小朋友寫的（' + S.answers.length + '）';
     renderSummaryGlyphs();
     $('sumGlyphs').parentElement.style.display = S.wrong.length ? 'flex' : 'none';
   }
@@ -1257,7 +1257,7 @@
     const w = S.wrong.slice();
     startRound(w);
   });
-  $('reviewBtn').addEventListener('click', () => openReview(S.answers, '小朋友寫成點', null));
+  $('reviewBtn').addEventListener('click', () => openReview(S.answers, '小朋友寫得如何', null));
   $('lastReviewBtn').addEventListener('click', () => {
     const d = loadSavedAnswers();
     if(d) openReview(d.items, '上次默書手寫', d.when);
@@ -1270,7 +1270,7 @@
   });
   $('reviewOverlay').addEventListener('click', e => { if(e.target === $('reviewOverlay')) closeReview(); });
 
-  // 錯字面板：睇完正確寫法就繼續
+  // 錯字面板：看完正確寫法就繼續
   $('wrongNext').addEventListener('click', () => { closeWrong(); nextQuestion(); });
   $('wrongSpeak').addEventListener('click', () => speak(wrongText, S.rep));
   $('wrongOverlay').addEventListener('click', e => {
@@ -1291,7 +1291,7 @@
   $('sumBackBtn').addEventListener('click', () => $('tabSeg').querySelector('[data-tab="setup"]').click());
 
   $('resetBtn').addEventListener('click', () => {
-    if(!confirm('清除默書內容同所有紀錄？')) return;
+    if(!confirm('清除默書內容和所有紀錄？')) return;
     ['dictRaw','dictMode','dictOrder','dictRep','dictRate','dictVoice','dictAnswers','dictWrongBook'].forEach(k => localStorage.removeItem(k));
     location.reload();
   });
@@ -1323,25 +1323,25 @@
     loadVoices();
     speechSynthesis.onvoiceschanged = loadVoices;
   } else {
-    $('voiceSel').innerHTML = '<option>（瀏覽器唔支援語音）</option>';
+    $('voiceSel').innerHTML = '<option>（瀏覽器不支援語音）</option>';
   }
   if(S.raw) extract();
 
-  // 預先載入詞典，等家長撳「抽取題目」時唔使等
+  // 預先載入詞典，家長按「抽取題目」時不需等待
   if(S.mode === 'word') setTimeout(loadDict, 300);
   else setTimeout(loadDict, 1500);
   loadEdb();   // 教育局字詞表對照表（細檔，順手預載）
   updateWrongBookBtn();
 
-  // 有上次嘅手寫紀錄就顯示入口
+  // 有上次的手寫紀錄就顯示入口
   const savedAns = loadSavedAnswers();
   if(savedAns){
     const btn = $('lastReviewBtn');
     btn.style.display = 'block';
-    btn.textContent = '睇返上次默書手寫（' + savedAns.items.length + ' 題）';
+    btn.textContent = '查看上次默書手寫（' + savedAns.items.length + ' 題）';
   }
 
-  // ?demo=wrong 自動跑一次「默錯 → 正確寫法」流程（畀截圖 / 快速自檢用）
+  // ?demo=wrong 自動跑一次「默錯 → 正確寫法」流程（供截圖 / 快速自檢用）
   const demoCase = new URLSearchParams(location.search).get('demo');
   if(demoCase){
     setTimeout(async () => {
