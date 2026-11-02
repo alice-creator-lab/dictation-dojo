@@ -726,13 +726,13 @@
 
   function redraw(){
     if(!ctx) return;
+    // 一次過用同一個 DPR 變換：格、十字線、筆跡全部同一個座標系，
+    // 之前 drawGrid() 喺 setTransform 之後（identity）畫，喺 2x 屏幕上
+    // 個格只畫到左上四分之一，同筆跡錯位，望落就好似「歪」。
     ctx.save();
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, paper.width / dpr, paper.height / dpr);
-    ctx.restore();
+    ctx.clearRect(0, 0, layout.w, layout.h);
     drawGrid();
-    ctx.save();
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.strokeStyle = '#26221d';
     ctx.lineWidth = 3.2; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
     strokes.forEach(st => {
