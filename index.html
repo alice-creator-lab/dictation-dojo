@@ -106,8 +106,6 @@
   .answer.show{display:block; animation:fade .2s ease-out;}
   @keyframes fade{from{opacity:0; transform:translateY(-4px);} to{opacity:1; transform:none;}}
   .ans-lab{font-size:12px; color:var(--ink-soft); letter-spacing:.06em; margin-bottom:4px;}
-  .ans-txt{font-family:"Noto Serif TC",serif; font-size:34px; font-weight:700; letter-spacing:.12em;
-    color:var(--ink); line-height:1.4; word-break:break-all;}
   .score{display:flex; gap:10px; margin-top:14px;}
   .score button{flex:1; border:0; font-family:inherit; font-size:16px; font-weight:700; padding:13px;
     border-radius:12px; cursor:pointer; transition:.15s;}
@@ -158,7 +156,7 @@
       #fffefb;}
   a.gz{box-shadow:0 1px 0 rgba(0,0,0,.04);}
   a.gz:active{transform:translateY(1px); background-color:#f4ecda;}
-  .gz.off{opacity:.42;}
+  .gz.off{opacity:.55; border-style:dashed;}
   .gz i{position:absolute; right:3px; bottom:2px; font-size:8.5px; font-style:normal;
     font-weight:800; color:var(--vermilion); letter-spacing:0;}
   .glyphs.big{gap:10px; justify-content:center;}
@@ -174,6 +172,22 @@
   .wrong-acts .mini{flex:0 0 auto;}
   .wrong-acts .btn-main{flex:1; margin:0;}
 
+  /* 錯題簿 */
+  .wblist{display:flex; flex-direction:column; gap:7px;}
+  .wbrow{display:flex; align-items:center; gap:9px; background:var(--card);
+    border:1px solid var(--line); border-radius:10px; padding:7px 9px;}
+  .wbrow .t{flex:1; min-width:0; font-family:"Noto Serif TC",serif; font-size:19px; color:var(--ink);
+    letter-spacing:.04em; background:none; border:0; padding:2px 0; text-align:left; cursor:pointer;
+    word-break:break-all;}
+  .wbrow .t:active{color:var(--indigo);}
+  .wbrow .glyphs{margin:0; gap:4px; flex:0 0 auto;}
+  .wbrow .gz{width:30px; height:30px; font-size:17px; border-radius:5px;}
+  .wbrow .gz i{display:none;}
+  .wbrow .n{flex:0 0 auto; font-size:10.5px; font-weight:700; color:var(--vermilion);}
+  .wbrow .del{flex:0 0 auto; width:26px; height:26px; border-radius:999px; border:1px solid var(--line);
+    background:var(--card); color:var(--ink-soft); font-size:14px; line-height:1; cursor:pointer;}
+  .wbempty{font-size:12.5px; color:var(--ink-soft); padding:12px 2px; line-height:1.7;}
+
   .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:2px;}
   .stat{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:9px 4px; text-align:center;}
   .stat .n{display:block; font-size:18px; font-weight:800; color:var(--indigo);}
@@ -183,7 +197,6 @@
   footer{font-size:11px; color:#b3a894; text-align:center; line-height:1.7; margin-top:auto; padding-top:10px;}
   .hidden{display:none !important;}
   @media (max-width:400px){
-    .ans-txt{font-size:28px;}
     .speakbtn{width:96px; height:96px;} .speakbtn svg{width:44px; height:44px;}
   }
 </style>
@@ -265,6 +278,7 @@
 
     <button class="btn-main" id="startBtn" disabled>開始默書</button>
     <button class="btn-main ghost" id="lastReviewBtn" style="display:none;">睇返上次默書手寫</button>
+    <button class="btn-main ghost" id="wrongBookBtn">錯題簿（0）</button>
   </section>
 
   <!-- ══════ 練習 ══════ -->
@@ -294,7 +308,6 @@
 
       <div class="answer" id="answerBox">
         <div class="ans-lab">正確答案</div>
-        <div class="ans-txt" id="ansTxt"></div>
         <div class="glyphs" id="glyphRow"></div>
         <div class="gz-hint" id="glyphHint"></div>
         <div class="score">
@@ -362,6 +375,23 @@
     <div class="gz-hint" id="wrongHint"></div>
     <div class="wrong-acts">
       <button class="btn-main" id="wrongNext">繼續 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ 錯題簿 ══════ -->
+<div class="overlay" id="wbOverlay">
+  <div class="sheet">
+    <div class="sheet-head">
+      <h3>錯題簿</h3>
+      <div class="sheet-acts">
+        <button class="x" id="wbClose">關閉</button>
+      </div>
+    </div>
+    <p class="sheet-note" id="wbNote"></p>
+    <div class="wblist" id="wbList"></div>
+    <div class="wrong-acts">
+      <button class="btn-main" id="wbPractice">練錯題 →</button>
     </div>
   </div>
 </div>
@@ -800,7 +830,6 @@
     S.revealed = false; S.answered = false;
     clearInk();
     $('answerBox').classList.remove('show');
-    $('ansTxt').textContent = '';
     $('revealBtn').disabled = false;
     $('revealBtn').textContent = '睇答案';
     $('charCount').textContent = '（' + currentText.length + ' 字）';
@@ -823,7 +852,6 @@
     if(S.revealed) return;
     S.revealed = true;
     stopSpeak();
-    $('ansTxt').textContent = currentText;
     renderGlyphs($('glyphRow'), currentText, $('glyphHint'));
     $('answerBox').classList.add('show');
     $('revealBtn').disabled = true;
@@ -859,6 +887,107 @@
       if(!d || !Array.isArray(d.items) || !d.items.length) return null;
       return d;
     }catch(_){ return null; }
+  }
+
+  // ── 錯題簿（跨次保存）──────────────────────────────────
+  // storage: [{ t:'詞語', n:錯幾次, ts:最後一次 }]，最多 300 條。
+  // 默錯自動入簿，之後答返啱就自動移走（同 kana-dojo 一樣嘅規矩）。
+  const WB_KEY = 'dictWrongBook';
+  let WRONG_BOOK = loadWrongBook();
+
+  function loadWrongBook(){
+    try{
+      const a = JSON.parse(localStorage.getItem(WB_KEY) || '[]');
+      if(!Array.isArray(a)) return [];
+      return a.filter(x => x && typeof x.t === 'string' && x.t.trim())
+              .map(x => ({ t: x.t, n: Math.max(1, x.n | 0 || 1), ts: x.ts || 0 }))
+              .slice(0, 300);
+    }catch(_){ return []; }
+  }
+
+  function saveWrongBook(){
+    try{ localStorage.setItem(WB_KEY, JSON.stringify(WRONG_BOOK.slice(0, 300))); }catch(_){}
+    updateWrongBookBtn();
+  }
+
+  function addWrongItem(text){
+    if(!text) return;
+    const hit = WRONG_BOOK.find(x => x.t === text);
+    if(hit){ hit.n = (hit.n || 1) + 1; hit.ts = Date.now(); }
+    else WRONG_BOOK.unshift({ t: text, n: 1, ts: Date.now() });
+    saveWrongBook();
+  }
+
+  function dropWrongItem(text){
+    const i = WRONG_BOOK.findIndex(x => x.t === text);
+    if(i < 0) return false;
+    WRONG_BOOK.splice(i, 1);
+    saveWrongBook();
+    return true;
+  }
+
+  function updateWrongBookBtn(){
+    const b = $('wrongBookBtn');
+    if(!b) return;
+    b.textContent = '錯題簿（' + WRONG_BOOK.length + '）';
+    b.classList.toggle('has', WRONG_BOOK.length > 0);
+  }
+
+  function renderWrongBook(){
+    const list = $('wbList');
+    if(!list) return;
+    list.innerHTML = '';
+    if(!WRONG_BOOK.length){
+      const p = document.createElement('div');
+      p.className = 'wbempty';
+      p.textContent = '仲未有錯題。默錯嘅詞語會自動入嚟，之後默返啱就會自動移走。';
+      list.appendChild(p);
+    }
+    WRONG_BOOK.forEach((it, idx) => {
+      const row = document.createElement('div');
+      row.className = 'wbrow';
+
+      const t = document.createElement('button');
+      t.className = 't'; t.textContent = it.t; t.title = '撳一下再聽一次';
+      t.addEventListener('click', () => speak(it.t));
+      row.appendChild(t);
+
+      const g = document.createElement('div');
+      g.className = 'glyphs';
+      renderGlyphs(g, it.t, null);
+      if(g.childNodes.length) row.appendChild(g);
+
+      const n = document.createElement('span');
+      n.className = 'n'; n.textContent = '錯' + (it.n || 1);
+      row.appendChild(n);
+
+      const x = document.createElement('button');
+      x.className = 'del'; x.textContent = '×'; x.title = '由錯題簿移除';
+      x.addEventListener('click', () => {
+        WRONG_BOOK.splice(idx, 1);
+        saveWrongBook();
+        renderWrongBook();
+      });
+      row.appendChild(x);
+
+      list.appendChild(row);
+    });
+    $('wbNote').textContent = WRONG_BOOK.length
+      ? '共 ' + WRONG_BOOK.length + ' 題 · 撳字再聽一次 · 撳細田字格睇筆順'
+      : '';
+    $('wbPractice').style.display = WRONG_BOOK.length ? 'block' : 'none';
+  }
+
+  function openWrongBook(){
+    stopSpeak();
+    renderWrongBook();
+    $('wbOverlay').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeWrongBook(){
+    $('wbOverlay').classList.remove('show');
+    document.body.style.overflow = '';
   }
 
   // 喺細畫布重畫田字格 + 筆跡
@@ -986,9 +1115,14 @@
     if(S.answered) return;
     S.answered = true;
     try{ captureAnswer(ok); }catch(e){ /* 儲筆跡失敗都唔可以卡住默書流程 */ }
-    if(ok){ S.stats.ok++; nextQuestion(); }
+    if(ok){
+      S.stats.ok++;
+      dropWrongItem(currentText);   // 默返啱就自動移出錯題簿
+      nextQuestion();
+    }
     else {
       S.stats.no++; S.wrong.push(currentText);
+      addWrongItem(currentText);
       updateStats();
       showWrong(currentText);
     }
@@ -1024,7 +1158,8 @@
     const acc = t ? Math.round(S.stats.ok / t * 100) : 0;
     $('sumTitle').textContent = acc === 100 ? '全部啱晒！' : '默書完成';
     $('sumText').innerHTML = '共 ' + t + ' 題 · 啱 <b>' + S.stats.ok + '</b> · 錯 <b>' + S.stats.no + '</b> · 正確率 ' + acc + '%'
-      + (S.wrong.length ? '<br>錯咗：' + S.wrong.join('、') : '');
+      + (S.wrong.length ? '<br>錯咗：' + S.wrong.join('、') : '')
+      + (S.wrong.length ? '<br>已寫入錯題簿，答返啱就會自動移走（簿中共 ' + WRONG_BOOK.length + ' 題）' : '');
     $('retryWrongBtn').style.display = S.wrong.length ? 'block' : 'none';
     $('retryWrongBtn').textContent = '重練錯題（' + S.wrong.length + '）';
     $('reviewBtn').style.display = S.answers.length ? 'block' : 'none';
@@ -1120,16 +1255,31 @@
   $('wrongOverlay').addEventListener('click', e => {
     if(e.target === $('wrongOverlay')){ closeWrong(); nextQuestion(); }
   });
+
+  // 錯題簿
+  $('wrongBookBtn').addEventListener('click', openWrongBook);
+  $('wbClose').addEventListener('click', closeWrongBook);
+  $('wbOverlay').addEventListener('click', e => { if(e.target === $('wbOverlay')) closeWrongBook(); });
+  $('wbPractice').addEventListener('click', () => {
+    const list = WRONG_BOOK.map(x => x.t);
+    if(!list.length) return;
+    closeWrongBook();
+    startRound(list);
+  });
   $('againBtn').addEventListener('click', () => startRound(S.items));
   $('sumBackBtn').addEventListener('click', () => $('tabSeg').querySelector('[data-tab="setup"]').click());
 
   $('resetBtn').addEventListener('click', () => {
     if(!confirm('清除默書內容同所有紀錄？')) return;
-    ['dictRaw','dictMode','dictOrder','dictRep','dictRate','dictVoice','dictAnswers'].forEach(k => localStorage.removeItem(k));
+    ['dictRaw','dictMode','dictOrder','dictRep','dictRate','dictVoice','dictAnswers','dictWrongBook'].forEach(k => localStorage.removeItem(k));
     location.reload();
   });
 
   document.addEventListener('keydown', e => {
+    if($('wbOverlay').classList.contains('show')){
+      if(e.key === 'Escape' || e.key === 'Enter'){ e.preventDefault(); closeWrongBook(); }
+      return;
+    }
     if($('wrongOverlay').classList.contains('show')){
       if(e.key === 'Enter' || e.key === 'Escape'){ e.preventDefault(); closeWrong(); nextQuestion(); }
       return;
@@ -1160,6 +1310,7 @@
   if(S.mode === 'word') setTimeout(loadDict, 300);
   else setTimeout(loadDict, 1500);
   loadEdb();   // 教育局字詞表對照表（細檔，順手預載）
+  updateWrongBookBtn();
 
   // 有上次嘅手寫紀錄就顯示入口
   const savedAns = loadSavedAnswers();
